@@ -84,9 +84,9 @@ eval' o = case o of
                       Failure -> Failure
                       Success yu ->
                         if yu == 0
-                          then Success(0)
+                          then Failure
                           else Success((/) xu yu)
-            Value xo -> Success(xo)
+            Value xooo -> Success(xooo)
 
 example1' :: Result Double
 example1' = eval' (Add (Mul (Value 5) (Value 3.4)) (Value 8))
@@ -94,13 +94,16 @@ example1' = eval' (Add (Mul (Value 5) (Value 3.4)) (Value 8))
 example2' :: Result Double
 example2' = eval' (Add (Div (Value 5) (Value 3.4)) (Value 0))
 
+
 data List a
     = Empty
     | Cons a (List a)
     deriving Show
 
 listHead :: List a -> Result a
-listHead = undefined
+listHead list = case list of
+                  Empty -> Failure
+                  Cons a b -> Success(a)
 
 head1 :: Result Int
 head1 = listHead Empty -- Failure
@@ -108,19 +111,30 @@ head2 :: Result Int
 head2 = listHead (Cons 5 (Cons 4 Empty)) -- success 5
 
 listTail :: List a -> Result (List a)
-listTail = undefined
+listTail list = case list of
+                  Empty -> Failure
+                  Cons a b -> Success(b)
 
 tail1 :: Result (List Int)
 tail1 = listTail Empty -- Failure
 tail2 :: Result (List Int)
 tail2 = listTail (Cons 5 (Cons 4 Empty)) -- success (Cons 4 Empty)
 
-
 listSum :: List Int -> Int
-listSum = undefined
+listSum list = case list of
+                 Empty -> 0
+                 Cons a as -> a + listSum as
+
 
 listEq :: Eq a => List a -> List a -> Bool
-listEq = undefined
+listEq l1 l2 = case (l1, l2) of
+                 (Empty, Empty) -> True
+                 (Empty, _) -> False
+                 (_, Empty) -> False
+                 (Cons a as, Cons b bs) -> a == b && listEq as bs
+
 
 toList :: List a -> [a]
-toList = undefined
+toList list = case list of
+                Empty -> []
+                Cons a as -> a : toList as
